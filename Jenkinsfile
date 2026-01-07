@@ -46,7 +46,7 @@ pipeline {
                     sh 'docker stop $DOCKER_IMAGE || true'
                     sh 'docker rm $DOCKER_IMAGE || true'
                     
-                    sh 'docker run -d -p 5000:5000 --name $DOCKER_IMAGE $DOCKERHUB_USER/$DOCKER_IMAGE:latest'
+                    sh 'docker run -d -p 3000:3000 --name $DOCKER_IMAGE $DOCKERHUB_USER/$DOCKER_IMAGE:latest'
 
                     // sh 'sleep 5'
                 }

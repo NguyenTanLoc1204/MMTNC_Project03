@@ -52,9 +52,9 @@ pipeline {
                     sh 'sleep 15' 
                     
                     sh 'docker ps'
-                    
+                    def containerIP = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $DOCKER_IMAGE", returnStdout: true).trim()
                     sh 'docker logs $DOCKER_IMAGE'
-                    sh 'curl http://localhost:5000 || echo "Curl failed but container is running"'
+                    sh "curl -v http://${containerIP}:5000"                
                 }
             }
         }

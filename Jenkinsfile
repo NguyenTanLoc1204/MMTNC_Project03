@@ -61,8 +61,7 @@ pipeline {
                     echo '--- 6. Test kết nối từ BÊN TRONG container ---'
                     // Lệnh này tương đương với việc bạn mở terminal của container và gõ curl
                     // Nó chắc chắn 100% sẽ bắt được kết quả nếu App đang chạy
-                    sh 'docker exec $DOCKER_IMAGE curl -v http://127.0.0.1:5000'          
-                }
+                    sh "docker exec $DOCKER_IMAGE python -c 'import urllib.request; print(urllib.request.urlopen(\"http://127.0.0.1:5000\").read().decode(\"utf-8\"))'"                }
             }
         }
     }

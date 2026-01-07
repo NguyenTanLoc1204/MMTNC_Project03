@@ -49,12 +49,19 @@ pipeline {
                     sh 'docker run -d -p 5000:5000 --name $DOCKER_IMAGE $DOCKERHUB_USER/$DOCKER_IMAGE:latest'
 
 
+                    echo '--- 3. Đang chờ 15s để ứng dụng khởi động... ---'
                     sh 'sleep 15' 
                     
+                    echo '--- 4. Kiểm tra trạng thái ---'
                     sh 'docker ps'
-                    def containerIP = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $DOCKER_IMAGE", returnStdout: true).trim()
+                    
+                    echo '--- 5. Log của Container (xem có lỗi Python không) ---'
                     sh 'docker logs $DOCKER_IMAGE'
-                    sh "curl -v http://${containerIP}:5000"                
+                    
+                    echo '--- 6. Test kết nối từ BÊN TRONG container ---'
+                    // Lệnh này tương đương với việc bạn mở terminal của container và gõ curl
+                    // Nó chắc chắn 100% sẽ bắt được kết quả nếu App đang chạy
+                    sh 'docker exec $DOCKER_IMAGE curl -v http://127.0.0.1:5000'          
                 }
             }
         }

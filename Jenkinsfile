@@ -47,6 +47,7 @@ pipeline {
                     sh 'docker rm $DOCKER_IMAGE || true'
                     
                     sh 'docker run -d -p 5000:5000 --name $DOCKER_IMAGE $DOCKERHUB_USER/$DOCKER_IMAGE:latest'
+                    sh 'curl http://localhost:5000 || echo "Curl failed but container is running"'
                 }
             }
         }

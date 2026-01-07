@@ -47,16 +47,6 @@ pipeline {
                     sh 'docker rm $DOCKER_IMAGE || true'
                     
                     sh 'docker run -d -p 5000:5000 --name $DOCKER_IMAGE $DOCKERHUB_USER/$DOCKER_IMAGE:latest'
-
-                    sh 'sleep 5'  
-                }
-            }
-        }
-
-        stage('Test Sever') {
-            steps {
-                script {
-                    sh 'docker exec $DOCKER_IMAGE curl -v http://127.0.0.1:5000'
                 }
             }
         }

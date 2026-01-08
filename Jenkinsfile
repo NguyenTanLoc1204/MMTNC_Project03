@@ -14,16 +14,6 @@ pipeline {
             }
         }
 
-        stage('Security Scan (SAST) - Bandit') {
-            steps {
-                script {
-                    sh 'pip install bandit'
-                    sh 'bandit -r . -f json -o bandit_report.json || true' 
-                    sh 'cat bandit_report.json' 
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 script {
@@ -31,6 +21,15 @@ pipeline {
                 }
             }
         }
+
+        stage('SAST - Bandit') {
+            steps {
+                script {
+                    sh 'docker run --rm $DOCKERHUB_USER/$DOCKER_IMAGE:latest bandit -r . -f json || true'
+                }
+            }
+        }
+
 
         stage('Login to Docker Hub') {
             steps {
@@ -62,7 +61,7 @@ pipeline {
             }
         }
 
-        stage('Security Scan (DAST) - OWASP ZAP') {
+        stage('DAST - OWASP ZAP') {
             steps {
                 script {
                     sh """

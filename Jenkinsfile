@@ -65,10 +65,9 @@ pipeline {
             steps {
                 script {
                     sh """
-                    docker run --rm --link $DOCKER_IMAGE:target_app \
-                    owasp/zap2docker-stable zap-baseline.py \
+                    docker run --rm -v \$(pwd):/zap/wrk/:rw --link $DOCKER_IMAGE:target_app \
+                    zaproxy/zap-stable zap-baseline.py \
                     -t http://target_app:3000 \
-                    -r zap_report.html \
                     || true
                     """
                 }

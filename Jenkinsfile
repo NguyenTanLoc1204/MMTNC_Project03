@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = '23127406-23127423-webapp' 
+        DOCKER_IMAGE = '23127406-webapp-test-security' 
         DOCKERHUB_CREDENTIALS = 'dockerhub-id' 
         DOCKERHUB_USER = '23127406' 
     }
@@ -11,6 +11,16 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Security Scan (SAST) - Bandit') {
+            steps {
+                script {
+                    sh 'pip install bandit'
+                    sh 'bandit -r . -f json -o bandit_report.json || true' 
+                    sh 'cat bandit_report.json' 
+                }
             }
         }
 
@@ -32,7 +42,7 @@ pipeline {
             }
         }
 
-        stage('Push Image to Docker Hub') { 
+        stage('Push Image') { 
             steps {
                 script {
                     sh 'docker push $DOCKERHUB_USER/$DOCKER_IMAGE:latest'
@@ -45,20 +55,25 @@ pipeline {
                 script {
                     sh 'docker stop $DOCKER_IMAGE || true'
                     sh 'docker rm $DOCKER_IMAGE || true'
-                    
                     sh 'docker run -d -p 3000:3000 --name $DOCKER_IMAGE $DOCKERHUB_USER/$DOCKER_IMAGE:latest'
-
-                    // sh 'sleep 5'
+                    
+                    sh 'sleep 5' 
                 }
             }
         }
 
-        // stage ('Test Sever') {
-        //     steps {
-        //         script {
-        //             sh 'docker exec $DOCKER_IMAGE curl -v http://127.0.0.1:5000'
-        //         }
-        //     }
-        // }
+        stage('Security Scan (DAST) - OWASP ZAP') {
+            steps {
+                script {
+                    sh """
+                    docker run --rm --link $DOCKER_IMAGE:target_app \
+                    owasp/zap2docker-stable zap-baseline.py \
+                    -t http://target_app:3000 \
+                    -r zap_report.html \
+                    || true
+                    """
+                }
+            }
+        }
     }
 }

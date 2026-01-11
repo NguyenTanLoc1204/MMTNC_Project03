@@ -1,7 +1,0 @@
-.git
-.gitignore
-__pycache__/
-*.log
-zap_report.html
-bandit*.json
-*.tmp

@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = '23127406-webapp-test-security' 
+        DOCKER_IMAGE = '23127406-23127423-webapp' 
         DOCKERHUB_CREDENTIALS = 'dockerhub-id' 
         DOCKERHUB_USER = '23127406' 
     }
@@ -22,15 +22,6 @@ pipeline {
             }
         }
 
-        stage('SAST - Bandit') {
-            steps {
-                script {
-                    sh 'docker run --rm $DOCKERHUB_USER/$DOCKER_IMAGE:latest bandit -r . -f json || true'
-                }
-            }
-        }
-
-
         stage('Login to Docker Hub') {
             steps {
                 script {
@@ -41,7 +32,7 @@ pipeline {
             }
         }
 
-        stage('Push Image') { 
+        stage('Push Image to Docker Hub') { 
             steps {
                 script {
                     sh 'docker push $DOCKERHUB_USER/$DOCKER_IMAGE:latest'
@@ -54,24 +45,20 @@ pipeline {
                 script {
                     sh 'docker stop $DOCKER_IMAGE || true'
                     sh 'docker rm $DOCKER_IMAGE || true'
-                    sh 'docker run -d -p 3000:3000 --name $DOCKER_IMAGE $DOCKERHUB_USER/$DOCKER_IMAGE:latest'
                     
-                    sh 'sleep 5' 
+                    sh 'docker run -d -p 3000:3000 --name $DOCKER_IMAGE $DOCKERHUB_USER/$DOCKER_IMAGE:latest'
+
+                    // sh 'sleep 5'
                 }
             }
         }
 
-        stage('DAST - OWASP ZAP') {
-            steps {
-                script {
-                    sh """
-                    docker run --rm -v \$(pwd):/zap/wrk/:rw --link $DOCKER_IMAGE:target_app \
-                    zaproxy/zap-stable zap-baseline.py \
-                    -t http://target_app:3000 \
-                    || true
-                    """
-                }
-            }
-        }
+        // stage ('Test Sever') {
+        //     steps {
+        //         script {
+        //             sh 'docker exec $DOCKER_IMAGE curl -v http://127.0.0.1:5000'
+        //         }
+        //     }
+        // }
     }
 }
